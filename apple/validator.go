@@ -77,6 +77,7 @@ func (c *Client) VerifyAppToken(ctx context.Context, reqBody AppValidationTokenR
 	data.Set("client_secret", reqBody.ClientSecret)
 	data.Set("code", reqBody.Code)
 	data.Set("grant_type", "authorization_code")
+	data.Set("scope", "name email")
 
 	return doRequest(ctx, c.client, &result, c.validationURL, data)
 }
