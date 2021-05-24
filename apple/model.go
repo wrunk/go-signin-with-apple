@@ -65,6 +65,10 @@ type ValidationResponse struct {
 
 	// Used to capture any error returned by the endpoint. Do not trust the response if this error is not nil
 	Error string `json:"error"`
+
+	// Of course apple is going to make this a nightmare and only ever send this back fully on the first request
+	// so we need to be really careful when decoding this
+	User AppleUser `json:"user"`
 }
 
 // RefreshResponse is a subset of ValidationResponse returned by Apple
@@ -80,4 +84,41 @@ type RefreshResponse struct {
 
 	// Used to capture any error returned by the endpoint. Do not trust the response if this error is not nil
 	Error string `json:"error"`
+}
+
+/*
+	"user": {
+		"name": {
+			"firstName":"John",
+			"lastName":"Doe"
+		},
+		"email":"example@privaterelay.appleid.com"
+	}
+*/
+type AppleUser map[string]interface{}
+
+func (au AppleUser) Name() (string, string) {
+
+	nameI, ok := au["name"]
+	if !ok {
+		return "", ""
+	}
+
+	nameMap, ok := nameI.(map[string]string)
+	if !ok {
+		return "", ""
+	}
+	return nameMap["firstName"], nameMap["lastName"]
+}
+
+func (au AppleUser) Email() string {
+	emailI, ok := au["email"]
+	if !ok {
+		return ""
+	}
+	email, ok := emailI.(string)
+	if !ok {
+		return ""
+	}
+	return email
 }
